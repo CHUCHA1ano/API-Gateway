@@ -1,0 +1,13 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://keycloak:8080/realms/jacapp/protocol/openid-connect/certs}
+
+keycloak:
+  admin:
+    url: ${KEYCLOAK_ADMIN_URL:http://keycloak:8080}
+
+user-service:
+  base-url: ${USER_SERVICE_URL:http://user-app:8081}
