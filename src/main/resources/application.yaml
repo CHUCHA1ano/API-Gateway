@@ -1,0 +1,52 @@
+spring:
+  application:
+    name: apiGateway
+  profiles:
+    active: local
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:8180/realms/jacapp/protocol/openid-connect/certs}
+
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: login
+              uri: ${KEYCLOAK_ADMIN_URL:http://localhost:8180}
+              predicates:
+                - Path=/api/auth/login
+                - Method=POST
+              filters:
+                - RewritePath=/api/auth/login, /realms/jacapp/protocol/openid-connect/token
+            - id: user-service
+              uri: ${USER_SERVICE_URL:http://localhost:8081}
+              predicates:
+                - Path=/api/users/**
+            - id: user-service-docs
+              uri: ${USER_SERVICE_URL:http://localhost:8081}
+              predicates:
+                - Path=/swagger-ui.html,/swagger-ui/**,/api-docs/**,/v3/api-docs/**
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+keycloak:
+  admin:
+    url: ${KEYCLOAK_ADMIN_URL:http://localhost:8180}
+    realm: ${KEYCLOAK_REALM:jacapp}
+    client-id: ${KEYCLOAK_CLIENT_ID:jacapp-backend}
+    client-secret: ${KEYCLOAK_CLIENT_SECRET}
+
+user-service:
+  base-url: ${USER_SERVICE_URL:http://localhost:8081}
+  internal-api-key: ${INTERNAL_API_KEY}
